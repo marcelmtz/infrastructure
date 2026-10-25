@@ -124,7 +124,15 @@ jobs:
           sed -i 's/WARDEN_VARNISH=.*/WARDEN_VARNISH=0/g' .env
           sed -i 's/WARDEN_RABBITMQ=.*/WARDEN_RABBITMQ=0/g' .env
           sed -i 's/WARDEN_REDIS=.*/WARDEN_REDIS=0/g' .env
-          sed -i 's/PHP_VERSION=.*/PHP_VERSION=${{ matrix.php_version }}/g' .env
+          # PHP 8.4.27 corrupts the Zend heap partway through the magento/framework
+          # unit suite (dies around test 6414/6736); 8.4.26 runs it clean. Pin the
+          # Warden container until the upstream PHP regression is fixed. setup-php
+          # above still uses matrix.php_version, as it takes no patch-level version.
+          WARDEN_PHP_VERSION="${{ matrix.php_version }}"
+          if [ "${WARDEN_PHP_VERSION}" = "8.4" ]; then
+            WARDEN_PHP_VERSION="8.4.26"
+          fi
+          sed -i "s/PHP_VERSION=.*/PHP_VERSION=${WARDEN_PHP_VERSION}/g" .env
           ${WARDEN} env up
           echo ${{secrets.DEPLOY_PASSWORD}} | sudo -S chmod -R a+rw .
 
