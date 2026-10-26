@@ -81,8 +81,8 @@ jobs:
       - name: Checkout Nx Repo
         uses: actions/checkout@v3
         with:
-          repository: mage-os/nx-for-php
-          ref: main
+          repository: marcelmtz/nx-for-php
+          ref: fix/split-php84-heap-bug-test
           path: nx
 
       - name: Install / setup Nx
